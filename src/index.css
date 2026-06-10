@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 p-4;
+  }
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer;
+  }
+  .btn-primary {
+    @apply bg-gray-900 text-white border-gray-900 hover:bg-gray-700;
+  }
+  .btn-danger {
+    @apply text-red-600 border-red-200 hover:bg-red-50;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  .input {
+    @apply w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-white;
+  }
+  .label {
+    @apply block text-xs font-medium text-gray-500 mb-1;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .tab-btn {
+    @apply flex-1 py-3 px-2 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-900 transition-colors;
+  }
+  .tab-btn.active {
+    @apply text-gray-900 border-gray-900;
+  }
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+
+.prose-ai {
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
