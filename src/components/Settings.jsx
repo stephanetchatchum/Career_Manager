@@ -41,6 +41,11 @@ export default function Settings({ apiKeys, onSave, onSwitchPerson, onExport, on
           </div>
           {form.gistId && <p className="text-xs text-green-500 mt-1">✓ Connected — Gist ID: {form.gistId.slice(0,12)}...</p>}
         </div>
+        <div>
+          <label className="label">Gist ID (optional — paste from another device to connect)</label>
+          <input className="input" value={form.gistId || ''} onChange={set('gistId')} placeholder="Leave empty to auto-detect" />
+          <p className="text-xs text-gray-400 mt-1">If auto-detect fails, copy the Gist ID from your other device and paste it here</p>
+        </div>
         <button onClick={handleSave} className="btn btn-primary">{saved ? '✓ Saved & connecting' : 'Save & connect'}</button>
       </div>
 

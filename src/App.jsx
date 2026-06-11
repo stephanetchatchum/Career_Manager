@@ -128,8 +128,13 @@ export default function App() {
     }
   }, [])
 
-  const saveAndSync = (newProfile, newOpps, newLearning, newProgramme, currentKeys) => {
-    const keys = currentKeys || apiKeys
+  const saveAndSync = (newProfile, newOpps, newLearning, newProgramme) => {
+    // Always read latest keys from localStorage to avoid stale React state
+    let keys = apiKeys
+    try {
+      const saved = localStorage.getItem('cm_keys')
+      if (saved) keys = JSON.parse(saved)
+    } catch (e) {}
     const data = getAllData(newProfile, newOpps, newLearning, newProgramme, keys)
     syncToGist(data, keys)
   }
@@ -178,23 +183,26 @@ export default function App() {
         if (existingId) {
           const newKeys = { ...data, gistId: existingId }
           setApiKeys(newKeys)
-          localStorage.setItem('cm_keys', JSON.stringify(newKeys))
+          localStorage.setItem('cm_keys', JSON.stringify(newKeys)) // write before load
           await autoLoadFromGist(data.githubToken, existingId)
         } else {
-          const allData = getAllData(profile, opps, learning, programme, data)
-          const gistId = await saveToGist(allData, data.githubToken, null)
-          const newKeys = { ...data, gistId }
+          const tempKeys = { ...data }
+          const allData = getAllData(profile, opps, learning, programme, tempKeys)
+          const gistId = await saveToGist(allData, tempKeys.githubToken, null)
+          const newKeys = { ...tempKeys, gistId }
           setApiKeys(newKeys)
-          localStorage.setItem('cm_keys', JSON.stringify(newKeys))
+          localStorage.setItem('cm_keys', JSON.stringify(newKeys)) // write before sync
           setSyncStatus('synced')
           setTimeout(() => setSyncStatus('idle'), 2000)
         }
       } catch (e) {
         setSyncStatus('error')
-        setTimeout(() => setSyncStatus('idle'), 3000)
+        setSyncError(e.message)
+        setTimeout(() => setSyncStatus('idle'), 4000)
       }
     } else if (data.githubToken && data.gistId) {
-      saveAndSync(profile, opps, learning, programme, data)
+      localStorage.setItem('cm_keys', JSON.stringify(data)) // ensure latest written
+      saveAndSync(profile, opps, learning, programme)
     }
   }
 
