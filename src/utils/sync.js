@@ -1,5 +1,14 @@
 const GIST_FILENAME = 'career-manager-data.json'
 
+function ghHeaders(token) {
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  }
+}
+
 export async function saveToGist(data, token, gistId) {
   const body = {
     description: 'Career Manager — synced data',
@@ -10,18 +19,24 @@ export async function saveToGist(data, token, gistId) {
   if (gistId) {
     const res = await fetch(`https://api.github.com/gists/${gistId}`, {
       method: 'PATCH',
-      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+      headers: ghHeaders(token),
       body: JSON.stringify(body)
     })
-    if (!res.ok) throw new Error('Failed to update gist')
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(`Update failed: ${err.message || res.status}`)
+    }
     return gistId
   } else {
     const res = await fetch('https://api.github.com/gists', {
       method: 'POST',
-      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+      headers: ghHeaders(token),
       body: JSON.stringify(body)
     })
-    if (!res.ok) throw new Error('Failed to create gist')
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(`Create failed: ${err.message || res.status}`)
+    }
     const d = await res.json()
     return d.id
   }
@@ -29,9 +44,12 @@ export async function saveToGist(data, token, gistId) {
 
 export async function loadFromGist(token, gistId) {
   const res = await fetch(`https://api.github.com/gists/${gistId}`, {
-    headers: { Authorization: `token ${token}` }
+    headers: ghHeaders(token)
   })
-  if (!res.ok) throw new Error('Failed to load gist')
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(`Load failed: ${err.message || res.status}`)
+  }
   const d = await res.json()
   const content = d.files[GIST_FILENAME]?.content
   if (!content) throw new Error('No data found in gist')
@@ -39,10 +57,13 @@ export async function loadFromGist(token, gistId) {
 }
 
 export async function findExistingGist(token) {
-  const res = await fetch('https://api.github.com/gists', {
-    headers: { Authorization: `token ${token}` }
+  const res = await fetch('https://api.github.com/gists?per_page=100', {
+    headers: ghHeaders(token)
   })
-  if (!res.ok) throw new Error('Failed to fetch gists')
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(`Auth failed: ${err.message || res.status} — check your token has "gist" scope`)
+  }
   const gists = await res.json()
   const found = gists.find(g => g.files[GIST_FILENAME])
   return found?.id || null

@@ -58,6 +58,7 @@ export default function App() {
   const [apiKeys, setApiKeys] = useState({ groq: '', claude: '', githubToken: '', gistId: '' })
   const [chatInit, setChatInit] = useState(null)
   const [syncStatus, setSyncStatus] = useState('idle')
+  const [syncError, setSyncError] = useState('')
   const [dark, setDark] = useState(false)
 
   // Dark mode
@@ -122,7 +123,8 @@ export default function App() {
       setTimeout(() => setSyncStatus('idle'), 2000)
     } catch (e) {
       setSyncStatus('error')
-      setTimeout(() => setSyncStatus('idle'), 3000)
+      setSyncError(e.message)
+      setTimeout(() => setSyncStatus('idle'), 4000)
     }
   }, [])
 
@@ -251,7 +253,7 @@ export default function App() {
       case 'learning': return <Learning learning={learning} onSave={saveLearning} onAskTip={handleAskTip} />
       case 'programme': return <Programme progress={programme} onSave={saveProgramme} />
       case 'chat': return <Chat profile={profile} opps={opps} learning={learning} programme={programme} apiKeys={apiKeys} initMessage={chatInit} onInitDone={() => setChatInit(null)} />
-      case 'settings': return <Settings apiKeys={apiKeys} onSave={saveKeys} onSwitchPerson={switchToNewPerson} onExport={handleExport} onImport={handleImport} syncStatus={syncStatus} />
+      case 'settings': return <Settings apiKeys={apiKeys} onSave={saveKeys} onSwitchPerson={switchToNewPerson} onExport={handleExport} onImport={handleImport} syncStatus={syncStatus} syncError={syncError} />
       default: return null
     }
   }
